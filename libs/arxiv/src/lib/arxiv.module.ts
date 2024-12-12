@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ArxivService } from './arxiv.service';
 
 @Module({
   controllers: [],
-  providers: [],
+  providers: [ArxivService],
   exports: [],
 })
 export class ArxivModule {}

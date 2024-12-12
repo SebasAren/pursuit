@@ -15,4 +15,8 @@ describe('ArxivService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should return a summary on call', () => {
+    expect(service.getSummary()).resolves.toBe(service.summary);
+  });
 });

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ArxivModule } from '@pursuit/arxiv';
 
 @Module({
-  imports: [],
+  imports: [ArxivModule],
   controllers: [AppController],
   providers: [AppService],
 })

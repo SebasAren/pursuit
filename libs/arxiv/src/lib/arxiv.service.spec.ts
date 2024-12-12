@@ -8,12 +8,12 @@ describe('ArxivService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [ArxivService],
     }).compile();
+    service = module.get<ArxivService>(ArxivService);
+
     // mock the getSummary to prevent outgoing http calls
     jest
       .spyOn(service, 'getSummary')
-      .mockImplementation(async () => service.summary);
-
-    service = module.get<ArxivService>(ArxivService);
+      .mockImplementation(async (subject) => service.summary);
   });
 
   it('should be defined', () => {
@@ -21,6 +21,6 @@ describe('ArxivService', () => {
   });
 
   it('should return a summary on call', () => {
-    expect(service.getSummary()).resolves.toBe(service.summary);
+    expect(service.getSummary('electron')).resolves.toBe(service.summary);
   });
 });

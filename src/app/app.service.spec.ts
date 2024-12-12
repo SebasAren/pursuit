@@ -18,4 +18,12 @@ describe('AppService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should have a method to combine user input with an arxiv summary', () => {
+    expect(service.createPromptInput).toBeDefined();
+  });
+
+  it('should be able to combine a user input with an arxiv summary', () => {
+    expect(service.createPromptInput()).toBe();
+  });
 });

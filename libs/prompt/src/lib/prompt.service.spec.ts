@@ -8,13 +8,14 @@ describe('PromptService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PromptService],
     }).compile();
+    service = module.get<PromptService>(PromptService);
+
     // mock submitToLlm to prevent any outgoing http calls
     jest
       .spyOn(service, 'submitToLlm')
       .mockImplementation(
         async () => "I'm sorry Dave, I'm afraid I can't do that."
       );
-    service = module.get<PromptService>(PromptService);
   });
 
   it('should be defined', () => {

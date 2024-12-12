@@ -6,8 +6,10 @@ import { PromptInfoInput } from './app.input';
 export class AppController {
   constructor(private appService: AppService) {}
 
-  @Post('ragInput')
-  ragInput(@Body() rageInputTdo: PromptInfoInput): Promise<string> {
-    return this.appService.createPromptInput(rageInputTdo);
+  @Post('rag')
+  rag(@Body() ragInputTdo: PromptInfoInput): Promise<string> {
+    // the actual endpoint where the user submits his question and the subject
+    // it's related to
+    return this.appService.createPromptInput(ragInputTdo);
   }
 }

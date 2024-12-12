@@ -19,8 +19,14 @@ describe('AppController', () => {
   });
 
   it('should call the correct service method', () => {
-    controller.ragInput({ userPrompt: 'as', arxivSubject: 'a' });
+    controller.rag({ userPrompt: 'as', arxivSubject: 'a' });
     expect(appService.createPromptInput).toHaveBeenCalledTimes(1);
   });
-  it('should');
+  it('should return the output of createPrompt immediately', () => {
+    const response = 'An electron is a subatomic element.';
+    appService.createPromptInput.mockImplementation(async () => response);
+    expect(
+      appService.createPromptInput({ arxivSubject: '', userPrompt: '' })
+    ).resolves.toBe(response);
+  });
 });

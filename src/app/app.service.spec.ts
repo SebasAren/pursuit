@@ -1,24 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { ArxivService } from '@pursuit/arxiv';
 import { AppService } from './app.service';
-import { PromptModule } from '@pursuit/prompt';
-import { ArxivModule } from '@pursuit/arxiv';
+import { PromptService } from '@pursuit/prompt';
+import { Mocked, TestBed } from '@suites/unit';
 
 describe('AppService', () => {
+  const output = "I'm sorry Dave, I'm afraid I can't do that.";
   let service: AppService;
+  let promptService: Mocked<PromptService>;
+  let arxivService: Mocked<ArxivService>;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [PromptModule, ArxivModule],
-      providers: [AppService],
-    }).compile();
-
-    service = module.get<AppService>(AppService);
-    // mock the createPromptInput method
-    jest
-      .spyOn(service, 'createPromptInput')
-      .mockImplementation(
-        async (input) => "I'm sorry Dave, I'm afraid I can't do that."
-      );
+    const { unitRef, unit } = await TestBed.solitary(AppService).compile();
+    service = unit;
+    promptService = unitRef.get(PromptService);
+    arxivService = unitRef.get(ArxivService);
+    promptService.submitToLlm.mockImplementation(async () => output);
   });
 
   it('should be defined', () => {
@@ -36,5 +32,10 @@ describe('AppService', () => {
         userPrompt: 'What can you tell me about electrons?',
       })
     ).resolves.toBe("I'm sorry Dave, I'm afraid I can't do that.");
+  });
+  it('should get the summary from arxiv and submit it to the llm', async () => {
+    await service.createPromptInput({ userPrompt: '', arxivSubject: '' });
+    expect(arxivService.getSummary).toHaveBeenCalledTimes(1);
+    expect(promptService.submitToLlm).toHaveBeenCalledTimes(1);
   });
 });

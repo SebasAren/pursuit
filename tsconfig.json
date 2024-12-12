@@ -14,7 +14,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@pursuit/arxiv": ["libs/arxiv/src/index.ts"]
+      "@pursuit/arxiv": ["libs/arxiv/src/index.ts"],
+      "@pursuit/prompt": ["libs/prompt/src/index.ts"]
     },
     "esModuleInterop": true
   },

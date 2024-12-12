@@ -12,6 +12,7 @@
     "@nestjs/common": "^10.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/swagger": "^8.1.0",
     "@suites/di.nestjs": "^3.0.0",
     "@suites/doubles.jest": "^3.0.0",
     "@suites/unit": "^3.0.0",

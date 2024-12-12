@@ -1,12 +1,12 @@
-import { Body, Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PromptInfoInput } from './app.input';
 
-@Controller('app')
+@Controller()
 export class AppController {
   constructor(private appService: AppService) {}
 
-  @Get()
+  @Post('ragInput')
   ragInput(@Body() rageInputTdo: PromptInfoInput): Promise<string> {
     return this.appService.createPromptInput(rageInputTdo);
   }

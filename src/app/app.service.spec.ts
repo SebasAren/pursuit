@@ -17,7 +17,7 @@ describe('AppService', () => {
     jest
       .spyOn(service, 'createPromptInput')
       .mockImplementation(
-        (input) => "I'm sorry Dave, I'm afraid I can't do that."
+        async (input) => "I'm sorry Dave, I'm afraid I can't do that."
       );
   });
 
@@ -35,6 +35,6 @@ describe('AppService', () => {
         arxivSubject: 'electron',
         userPrompt: 'What can you tell me about electrons?',
       })
-    ).toBe("I'm sorry Dave, I'm afraid I can't do that.");
+    ).resolves.toBe("I'm sorry Dave, I'm afraid I can't do that.");
   });
 });

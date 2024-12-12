@@ -9,5 +9,12 @@ export class AppService {
     private promptService: PromptService,
     private arxivService: ArxivService
   ) {}
-  createPromptInput({ userPrompt, arxivSubject }: PromptInfoInput) {}
+  async createPromptInput({
+    userPrompt,
+    arxivSubject,
+  }: PromptInfoInput): Promise<string> {
+    const summary = await this.arxivService.getSummary(arxivSubject);
+    const fullPrompt = `${userPrompt} Answer the above based on, based on: ${summary}`;
+    return this.promptService.submitToLlm(fullPrompt);
+  }
 }

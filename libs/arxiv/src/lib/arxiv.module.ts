@@ -4,6 +4,6 @@ import { ArxivService } from './arxiv.service';
 @Module({
   controllers: [],
   providers: [ArxivService],
-  exports: [],
+  exports: [ArxivService],
 })
 export class ArxivModule {}

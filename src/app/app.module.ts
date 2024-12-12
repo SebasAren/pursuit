@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ArxivModule } from '@pursuit/arxiv';
+import { PromptModule } from '@pursuit/prompt';
 
 @Module({
-  imports: [ArxivModule],
+  imports: [PromptModule],
   controllers: [],
   providers: [],
 })

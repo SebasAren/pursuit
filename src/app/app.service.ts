@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PromptService } from '@pursuit/prompt';
 import { ArxivService } from '@pursuit/arxiv';
+import { PromptInfoInput } from './app.input';
 
 @Injectable()
 export class AppService {
@@ -8,4 +9,5 @@ export class AppService {
     private promptService: PromptService,
     private arxivService: ArxivService
   ) {}
+  createPromptInput({ userPrompt, arxivSubject }: PromptInfoInput) {}
 }

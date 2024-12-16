@@ -1,101 +1,45 @@
 # Pursuit
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## Stappenplan
+  1. Keuzes maken welke frameworks gebruikt worden.
+  2. Project initialiseren.
+  3. Modules aanmaken voor de arXiv en prompt onderdelen.
+  4. Tests implementeren in deze modules.
+  5. Modules zelf implementeren.
+  6. Modules bundelen tot 1 applicatie.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Keuzes
+Ik heb hier voor een oplossing gekozen gebaseerd op NestJS in een monorepo gemaakt met Nx, alles in Typescript. Deze keuze is gemaakt deels op basis van eerdere ervaring en, in het geval van Nx, interesse in een alternatief van een eerder gebruikte tool (Turborepo). Een aantal alternatieven die ik heb overwegen zijn als volgt:
+ - tRPC: tRPC is wat mij betreft een van de meest interessante opties voor het bouwen van een backend, maar is in zekere mate polariserend. Het houdt zich in het geheel niet aan REST, maar geeft daarvoor een bijna automatische integratie tussen backend en frontend voor terug. Niet gebruikt omdat het geen standaard oplossing is.
+ - graphQL: Ik ben persoonlijk een groot fan van graphQL in grote projecten, omdat het vergelijkbare voordelen heeft als tRPC, maar ook cross-language werkt, tRPC is voornamelijk bedoeld voor full stack typescript. Grote nadeel van graphQL is dat het een significante "developer overhead" heeft, waarmee ik bedoel dat het flink wat boilerplate en tooling werk vereist. Niet gekozen omdat het niet passend is voor een opdracht van een paar uur.
+ - turborepo: Alternatief voor Nx. Iets minder "opinionated" dan Nx, maar daardoor ook iets minder behulpzaam. Nx voegt flink wat "code generators" toe om snel nieuwe delen van je applicatie aan te maken. Niet gekozen omdat ik het al eerder gebruikt heb en eens Nx wilde proberen.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/node?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
 
-## Run tasks
+## Idee voor RAG
+Voor het implementeren van de RAG backend heb ik me laten inspireren door [Pathfinder](https://huggingface.co/spaces/kiyer/pathfinder). Toevallig is een vriend van mij actief als onderzoeker in de astrofysica en daar ook bezig met machine learning. Dit model heeft RAG toegepast op [arXiv](https://arxiv.org/), een pre-publicatie site voor physics en astrophysics science papers. Dit model is dus extra "getrained" op astrofysica vraagstukken en kan bijvoorbeeld "Wat is de waarde van de Hubble constante". Voor zover ik heb begrepen is dit model getrained op de abstracts en conslusies van alle papers tot een bepaalde datum (ergens dit jaar). Dit werkt met gebruik van een vector database en is behoorlijk high tech.
 
-To run the dev server for your app, use:
+Mijn idee is een zwak aftreksel van dit model. Er zijn een aantal zware concessies die ik heb gedaan om niet daadwerkelijk een langdurig project te moeten beginnen:
+ - Geen koppeling met arxiv API. Deze API is heel mooi, maar heeft geen OpenAPI spec of iets vergelijkbaars en levert de data in xml aan. Beide voegen ongeveer een week toe om dit fatsoenljk uit te werken of het toevoegen van een zeer slecht onderhouden externe library. Ik heb dit dus gehardcode naar een endpoint die een voorgekozen abstract returned van een paper.
+ - Geen koppeling met een LLM. Ik moet eerlijk toegeven dat ik nog nooit een koppeling met een LLM geschreven heb, dus heb een beetje moeten gokken hoe dat normaal zou werken. Vanuit mijn ervaring met LLM's zou ik zeggen dat ze eigenlijk maar 1 echte parameter willen, namelijk de user input (prompt). Ik heb ook deze koppeling gewoon gehardcode met een mooie quote uit 2001: A Space Odyssey.
+ - Het originele idee gebruikt llm embedding met een vector database. Ik heb dit zwaar versimpeld tot een voorbeeld wat ik tegenkwam op wikipedia: [SVG](https://upload.wikimedia.org/wikipedia/commons/1/14/RAG_diagram.svg) en de nep "summary" toegevoegd aan de prompt die de user invoert. Ook wordt er aan de gebruiker een onderwerp gevraagd waar de vraag over gaat.
+ - Ik heb maar 1 endpoint gemaakt. De opdracht heeft het ook over een endpoint voor de retrievel. Mijn idee is eigenlijk dat er in de hele applicatie maar 1 endpoint (user input) hoeft te zijn. De gebruiker hoort, buiten zijn "prompt", geen impact te hebben op de context die het LLM mee krijgt.
+  - Mocht er dus wel echt een 2e endpoint nodig zijn, dan zou het met de huidige setup heel makkelijk zijn om dit toe te voegen. Je zou via een controller method direct de "getSummary" functie kunnen aanroepen.
 
-```sh
-npx nx serve pursuit
-```
+## Tests
+NestJS heeft een groot voordeel dat testing goed ingebouwd is. Het scheiden in losse containers is bedoeld om alles los te kunnen testen. Ik heb het in dit geval Test-Driven geschreven, waar ik op zich wel een fan van ben. Als alles al getest is voordat de code is geschreven weet je dat de code die je schrijft gewoon klopt. In dit geval is het alleen nog niet helemaal compleet. Er missen integratie tests en e2e tests, waarvan ik vooral de integratie tests wel belangrijk vind.
 
-To create a production bundle:
+Handmatig is het endpoint ook te testen bij de [OpenAPI docs](http://localhost:3000/docs)
 
-```sh
-npx nx build pursuit
-```
+## Frontend
+De frontend die hierbij hoort bestaat uit 2 inputs: vraag en onderwerp. Bijvoorbeeld: "Wat is de waarde van de Hubble constante?" en "Astrofysica".
 
-To see all available targets to run for a project, run:
+## Scalability
+Ik ben een groot fan van monorepos. Monorepos voegen een extra laag aan modulariteit toe, namelijk de packages. Deze monorepo is een beetje saai, omdat er maar 1 app in staat, een NestJS backend app. Ondanks dat deze saai is heeft het wel direct duidelijke voordelen.  De llm integratie (lib/prompt) en arxiv integratie (lib/arxiv) zijn twee losse modules. Het is goed voor te stellen dat een volgend project 1 van beide (waarschijnlijk de llm) zou willen hergebruiken. In dat geval is het alleen nodig om die applicatie ook aan te maken in deze monorepo en beide applicaties kunnen dan direct gebruik maken van dezelfde libs, zoals de prompt lib. Dit is een combinatie van microservices (iedere applicatie draait nog steeds zelfstandig) en een monoliet (applicaties kunnen hard gekoppeld worden aan elkaar).
 
-```sh
-npx nx show project pursuit
-```
+Naast een andere backend toevoegen is het ook interessant om hier direct een frontend (NextJS?) aan toe voegen. Aangezien alles in dezelfde repo staat kan je heel simpel via OpenAPI (of GraphQL/tRPC) de frontend blijven koppelen aan de backend via een gedeelde library (OpenAPI client, GraphQL queries of een tRPC type). Dit geeft direct feedback (lees: type errors) in frontends als je iets aanpast in de backend. Je kan dus redelijk veilig database migraties uitvoeren.
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/node:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/node:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/node?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Verbeteringen
+Omdat ik niet al te veel tijd wil besteden aan de code (het is uiteindelijk redelijk waardeloos), zijn er nog een aantal stukken laaghangend fruit om te verbeteren.
+ - Er is geen enkele vorm van externe koppeling, zowel API's als databases. Zowel arXiv als het LLM zijn mocked, ook in de echte versie, dit zou een van de eerste dingen zijn die je moet regelen. Eigenlijk zou je ook net als in de inspiratie die ik opgaf een vector database willen opzetten om de context die je meestuurt te indexeren. Ik heb geen ervaring met vector databases, dus dat zou tijd kosten om te doen.
+ - Deployment moet nog geregeld worden. Nx heeft een Dockerfile aangemaakt die er redelijk goed uit ziet, maar dit is uiteraard niet genoeg voor productie. Er moeten github actions (of Gitlab CI/CD) aangemaakt worden (Nx beweert dit ook te kunnen bij het project aanmaken) en het moet ergens online gezet worden.
+ - Er is nog wel wat documentatie nodig bij de applicaties en modules.

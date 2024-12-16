@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PromptService } from './prompt.service';
+import nock, { Scope } from 'nock';
 
 describe('PromptService', () => {
   let service: PromptService;
+  let llmMock: Scope;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -10,12 +12,8 @@ describe('PromptService', () => {
     }).compile();
     service = module.get<PromptService>(PromptService);
 
-    // mock submitToLlm to prevent any outgoing http calls
-    jest
-      .spyOn(service, 'submitToLlm')
-      .mockImplementation(
-        async () => "I'm sorry Dave, I'm afraid I can't do that."
-      );
+    // mock potential llm endpoints
+    llmMock = nock('https://prompt.llm.amsterdam');
   });
 
   it('should be defined', () => {

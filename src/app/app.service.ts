@@ -14,7 +14,7 @@ export class AppService {
     arxivSubject,
   }: PromptInfoInput): Promise<string> {
     const summary = await this.arxivService.getSummary(arxivSubject);
-    const fullPrompt = `${userPrompt} Answer the above based on, based on: ${summary}`;
+    const fullPrompt = `${userPrompt} Answer the above, based on: ${summary}`;
     return this.promptService.submitToLlm(fullPrompt);
   }
 }
